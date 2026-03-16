@@ -29,6 +29,11 @@
   Validate player input  
   Handle invalid commands  
 
+### Command Help System
+  Implement help command  
+  List available commands  
+  Provide command descriptions  
+
 ### Character Classes
   Create base Character class  
   Implement Player class  
@@ -51,12 +56,25 @@
   Implement stun effect  
   Implement buff and debuff durations  
 
+### Enemy AI
+  Implement enemy behavior logic  
+  Create aggressive enemies  
+  Create defensive enemies  
+  Create ranged enemies  
+
 ### Simple Dungeon Navigation
   Create Dungeon class  
   Create Room class  
   Implement player movement between rooms  
   Implement room descriptions  
   Implement navigation commands (north, south, east, west)
+
+### Trap System
+  Create Trap class  
+  Implement spike traps  
+  Implement poison traps  
+  Implement hidden traps  
+  Implement trap detection  
 
 ### Enemy Encounters
   Spawn enemies inside rooms  
@@ -69,6 +87,11 @@
   Print system messages  
   Log combat calculations  
   Log dungeon generation  
+
+### Error Handling
+  Prevent invalid game states  
+  Validate player input  
+  Handle corrupted save files  
 
 ---
 
@@ -102,6 +125,11 @@
   Implement LevelUp method  
   Implement GainExperience method  
 
+### Skill Tree
+  Create skill nodes  
+  Implement skill unlocking  
+  Implement branching skill paths  
+
 ### Abilities
   Create Ability class  
   Implement ability unlocking  
@@ -114,6 +142,12 @@
   Implement drop chances  
   Generate random items  
   Implement rarity tiers (Common, Uncommon, Rare, Epic, Legendary)
+
+### Procedural Item Generation
+  Generate item prefixes  
+  Generate item suffixes  
+  Apply stat modifiers  
+  Combine modifiers with base items  
 
 ### Economy System
   Implement gold currency  
@@ -128,6 +162,12 @@
   Save dungeon progress  
   Implement load game  
   Implement autosave system  
+
+### Save Slots
+  Implement multiple save slots  
+  Create player profiles  
+  Allow selecting save slot on game start  
+  Implement save slot deletion  
 
 ### Data Management
   Store enemies in JSON files  
@@ -161,6 +201,11 @@
   Implement event outcomes  
   Implement player decision options  
 
+### Map System
+  Track visited rooms  
+  Display dungeon map  
+  Reveal nearby rooms  
+
 ### Boss System
   Create Boss base class  
   Implement boss abilities  
@@ -183,6 +228,11 @@
   Implement relic stacking  
   Implement relic effects during gameplay  
 
+### Meta Progression
+  Track permanent upgrades  
+  Unlock abilities between runs  
+  Unlock new relics  
+
 ### Faction Reputation
   Define world factions  
   Implement reputation values  
@@ -194,6 +244,16 @@
   Track player decisions  
   Implement branching outcomes  
   Implement story flags and consequences  
+
+### Achievement System
+  Track player milestones  
+  Unlock achievements  
+  Record achievements in save file  
+
+### Game Metrics
+  Track player deaths  
+  Track run duration  
+  Track enemy kills  
 
 ### Difficulty Scaling
   Scale enemy stats by dungeon depth  
@@ -208,6 +268,11 @@
   Adjust enemy stats  
   Adjust XP progression curves  
   Adjust item scaling and rarity balance  
+
+### Tutorial System
+  Introduce basic controls  
+  Introduce combat mechanics  
+  Introduce inventory usage  
 
 ### Performance
   Optimize dungeon generation  
