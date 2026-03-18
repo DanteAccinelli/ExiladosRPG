@@ -15,16 +15,16 @@
 ### GameState
   - GameState(enum) -> MainMenu, Playing, Combat, Inventory, Dialogue, GameOver
 
-### InputHandler
-  - string LastInput
-  - ReadInput(), ValidateInput(string input), GetCommand()
+### ICommand
+  - string Name, string Description
+  - Execute()
 
-### CommandParser
-  - Dictionary<string, ICommand> commands
+### CommandParser : ICommand
+  - string Name, string Description
   - Parse(string input), ExecuteCommand(string input), RegisterCommand(string key, ICommand command)
 
-### CommandHelpSystem
-  - Dictionary<string, string> commandDescriptions
+### CommandHelpSystem : ICommand
+  - string Name, string Description
   - ShowAllCommands(), ShowCommandDetails(string command), ShowCommandsByState(GameState state)
 
 ### ILogger
@@ -33,10 +33,6 @@
 ### Logger : ILogger
   - bool DebugMode
   - LogInfo(string message), LogWarning(string message), LogError(string message)
-
-### ICommand
-  - string Name, string Description
-  - Execute()
 
 ---
 
@@ -51,27 +47,29 @@
 ### IHealeable
   - Heal(int amount)
 
-### IStatusEffectTarget
-  - ApplyStatusEffect(StatusEffect effect), RemoveStatusEffect(StatusEffect effect)
-
-### Character: IDamageable, IAttacker, IHealable, IStatusEffectTarget
-  - string Name, int HP, int MaxHP, int Attack, int CritChange, int Defense, int Speed, int Level, List<StatusEffects> StatusEffects
-  - Attack(Character target), TakeDamage(int amount), Heal(int amount), ApplyStatusEffect(StatusEffect effect), RemoveStatusEffect(StatusEffect effect), IsAlive()
+### Character: IDamageable, IAttacker, IHealable
+  - string Name, int HP, int MaxHP, int Attack, int CritChance, int Defense, int Speed, int Level, List<IStatusEffect> StatusEffects
+  - Attack(Character target), TakeDamage(int amount), Heal(int amount), ApplyStatusEffect(IStatusEffect effect), RemoveStatusEffect(IStatusEffect effect), IsAlive()
 
 ### Player : Character
-  - Inventory Inventory, EquipmentManager EquipmentManager, List<IAbility> Abilities, SkilTree SkillTree, int Gold, int Experience
+  - Inventory Inventory, EquipmentManager EquipmentManager, List<IAbility> Abilities, SkillTree SkillTree, int Gold, int Experience
   - GainExperience(int amount), LevelUp(), UnlockAbility(IAbility ability), EquipItem(Item item), UnequipItem(Item item)
 
 ### Enemy : Character
-  - EnemyType(enum) -> Melee, Ranged, Defensive, LootTable LootTable, IAIBehavior AI
+  - LootTable LootTable, IAIBehavior AI
   - PerformAction(Player player), DropLoot(), InitializeStats()
+
+### MeleeEnemy : Enemy
+
+//More Enemies
 
 ### IAIBehavior
   - DecideAction(Enemy enemy, Player player)
 
-### EnemyAI : IAIBehavior
-  - BehaviorType(enum) -> Passive, Agressive, Patrol
-  - DecideAction(Enemy enemy, Player player), ChooseTarget(), ExecuteBehavior() 
+### AgressiveBehavior : IAIBehavior
+  - DecideAction(Enemy enemy, Player player)
+
+//More Behaviors
 
 ---
 
@@ -84,11 +82,13 @@
 ### DamageCalculator
   - CalculateDamage(Character attacker, Character defender), ApplyModifiers(int baseDamage, List<StatusEffect> effects)
 
-### StatusEffectProcessor
-  - ProcessEffects(Character character), RemoveExpiredEffects(Character character)
+### IStatusEffect
+  - String Name {get;} int Duration {get;} bool IsExpired{get;}
+  - OnApply(Character target), OnTurnStart(Character target), OnTurnEnd(Character target), OnExpire(Character target)
 
-### IEffect
-  - Apply(Character target)
+### PoisonEffect : IStatusEffect
+  - string Name, int Duration, bool IsExpired, int DamagePerTurn
+  - PoisonEffect(int damage, int duration)
 
 ---
 
@@ -102,13 +102,21 @@
   - int NumberOfRooms
   - GenerateRooms(), ConnectRooms(), AssignRoomTypes()
 
-### Room
-  - int RoomID, RoomType(enum) -> Enemy, Treasure, Event, Shop, Boss, List<Enemy> Enemies, List<Item> Items, List<Traps> Traps, bool Visited
+### IRoom
+  - int RoomID, List<Enemy> Enemies, List<Item> Items, List<Trap> Traps, bool Visited
   - Enter(Player player), TriggerEvent(), ClearRoom()
 
-### Trap
-  - TrapType(enum) -> Spike, Poison, Arrows, int Damage, bool IsHidden
+### TreasureRoom : IRomm
+
+//More Rooms
+
+### ITrap
+  - string Name, bool IsHidden
   - Trigger(Player player), Detect(Player player)
+
+### SpikeTrap : ITrap
+  - string Name, bool IsHidden, int damage
+  - SpikeTrap(), void Trigger(Player player), void Detect(Player player)
 
 ### MapSystem
   - List<Room> VisitedRooms
@@ -127,12 +135,15 @@
 ### IModifier
   - Apply(Item item)
 
+### FireModifier : IModifier
+
+//More Modifiers
+
 ### IPassiveEffect
   - Apply(Player player)
 
-### Item : Usable
+### Item
   - string Name, string Description, int Value, enum Rarity (Common, Uncommon, Rare, Epic, Legendary)
-  - Use(Player player)
 
 ### Weapon : Item, IEquipable
   - int DamageBonus, float AttackSpeed
@@ -142,8 +153,9 @@
   - int DefenseBonus
   - Equip(Player player), Unequip(Player player)
 
-### Potion : Item
+### Potion : Item, IUsable
   - int HealAmount, StatusEffect BuffEffect
+  - Use(Player player)
 
 ### Relic : Item, IPassiveEffect
   - Apply(Player player)
@@ -212,11 +224,12 @@
 ### IGameEvent
   - Execute(Player player)
 
+### TreasureEvent : IGameEvent
+  - Execute(Player player)
+
 ### DataManager : IDataLoader
   - LoadItems(), LoadEnemies(), LoadEvents(), Load()
 
-### IGameEvent
-  - Execute(Player player)
 
 ### EventSystem
   - TriggerEvent(Room room), ResolveEvent()
