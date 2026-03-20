@@ -1,31 +1,37 @@
-# Exilados RPG Class Architecture
+Exilados RPG Class Architecture
 
 ---
 
-## Core
+1. Core
+(Game loop, input logging, commands, global state)
+
+1.1 Game Loop / State
 
 ### GameManager
-  - StateManager stateManager, InputHandler inputHandler, bool IsRunning
+  - StateManager StateManager, InputHandler InputHandler, bool IsRunning
   - StartGame(), Update(), ExitGame(), InitializeSystem(), GameLoop()
 
 ### StateManager
-  - GameState currentState
+  - GameState CurrentState
   - ChangeState(GameState new State), GetCurrentState(), UpdateState()
 
 ### GameState
   - GameState(enum) -> MainMenu, Playing, Combat, Inventory, Dialogue, GameOver
 
+### InputHandler
+  - IInput Input, CommandParser parser, StateManager StateManager
+  - HandleInput() 
+
 ### ICommand
   - string Name, string Description
   - Execute()
 
-### CommandParser : ICommand
-  - string Name, string Description
+### CommandParser
   - Parse(string input), ExecuteCommand(string input), RegisterCommand(string key, ICommand command)
 
 ### CommandHelpSystem : ICommand
-  - string Name, string Description
-  - ShowAllCommands(), ShowCommandDetails(string command), ShowCommandsByState(GameState state)
+  - string Name, string Description, CommandParser parser
+  - Execute(), ShowAllCommands()
 
 ### ILogger
   - LogInfo(string message), LogWarning(string message), LogError(string message)
@@ -47,9 +53,22 @@
 ### IHealeable
   - Heal(int amount)
 
+### Stats
+  - int MaxHP, int HP, int Attack, int Defense, int Speed, int CritChance, int CritDamage
+
+### StatusEffectContainer
+  - List<IStatusEffect> ActiveEffects
+  - Add(IStatusEffect effect), Remove(IStatusEffect effect), UpdateTurnStart(Character c), UpdateTurnEnd(Character c)
+
+### IStatusEffect
+  - String Name {get;} int Duration {get;} bool IsExpired{get;}
+  - OnApply(Character target), OnTurnStart(Character target), OnTurnEnd(Character target), OnExpire(Character target)
+
+//More Effects
+
 ### Character: IDamageable, IAttacker, IHealable
-  - string Name, int HP, int MaxHP, int Attack, int CritChance, int Defense, int Speed, int Level, List<IStatusEffect> StatusEffects
-  - Attack(Character target), TakeDamage(int amount), Heal(int amount), ApplyStatusEffect(IStatusEffect effect), RemoveStatusEffect(IStatusEffect effect), IsAlive()
+  - string Name, Stats BaseStats, Stats CurrentStats, StatusEffectContainer EffectManager, int Level
+  - TakeDamage(int amount), Attack(IDamageable target), Heal(int amount), IsAlive()
 
 ### Player : Character
   - Inventory Inventory, EquipmentManager EquipmentManager, List<IAbility> Abilities, SkillTree SkillTree, int Gold, int Experience
@@ -57,17 +76,17 @@
 
 ### Enemy : Character
   - LootTable LootTable, IAIBehavior AI
-  - PerformAction(Player player), DropLoot(), InitializeStats()
+  - ICombatAction DecideAction(GameContext context), DropLoot(), InitializeStats()
 
 ### MeleeEnemy : Enemy
 
 //More Enemies
 
 ### IAIBehavior
-  - DecideAction(Enemy enemy, Player player)
+  - DecideAction(Enemy enemy, GameContext context)
 
 ### AgressiveBehavior : IAIBehavior
-  - DecideAction(Enemy enemy, Player player)
+  - DecideAction(Enemy enemy, GameContext context)
 
 //More Behaviors
 
@@ -76,15 +95,35 @@
 ## Combat
 
 ### CombatSystem
-  - Player player, Enemy enemy, bool IsCombatActive
-  - StartCombat(Player player, Enemy enemy), PlayerTurn(), EnemyTurn(), EndCombat(), CheckVictory()
+  - Player player, List<Enemy> Enemies, bool IsCombatActive
+  - StartCombat(Player player, List<Enemy> enemies), TurnOrderManager TurnOrder, ExecuteAction(ICombatAction action), EndCombat(), CheckVictory()
 
-### DamageCalculator
-  - CalculateDamage(Character attacker, Character defender), ApplyModifiers(int baseDamage, List<StatusEffect> effects)
+### TurnOrderManager
+  - List<Character> TurnOrder
+  - Initialize(List<Character> actions), Character GetNextAction(), RefreshTurnOrder()
 
-### IStatusEffect
-  - String Name {get;} int Duration {get;} bool IsExpired{get;}
-  - OnApply(Character target), OnTurnStart(Character target), OnTurnEnd(Character target), OnExpire(Character target)
+### ICombatAction
+  - Execute(GameContext context)
+
+### AttackAction : ICombatAction
+  - Character Attacker, Character Defender
+  - Execute(GameContext context)
+
+### UseItemAction : ICombatAction
+  - Player User, Item Item
+  - Execute(GameContext context)
+
+### AbilityAction : ICombatAction
+  - Character User, IAbility Ability
+  - Execute(GameContext context)
+
+//More Actions
+
+### DamageFormula
+  - CalculateDamage(Character attacker, Character defender), bool RollCritical(Character attacker)
+
+### StatusEffectProcessor
+  - ApplyDamageModifiers(int damage, Character attacker, Character defender), ApplyOnHitEffects(Character attacker, Character defender)
 
 ### PoisonEffect : IStatusEffect
   - string Name, int Duration, bool IsExpired, int DamagePerTurn
@@ -95,32 +134,61 @@
 ## Dungeon
 
 ### Dungeon
-  - List<Room> Rooms, Room CurrentRoom
-  - Generate(), EnterRoom(Room room), MovePlayer(string direction), GetAdjacentRoom(string direction)
+  - RoomGraph Graph, RoomNode CurrentNode
+  - Generate(), EnterRoom(RoomNode room)
+
+### RoomNode
+  - IRoom Room, Dictionary<string, RoomNode> Connections
+
+### RoomGraph
+  - List<RoomNode> Nodes
+
+### RoomNavigation
+  - RoomNode GetAdjacent(RoomNode current, string direction), MoveTo(RoomNode next)
 
 ### DungeonGenerator
   - int NumberOfRooms
   - GenerateRooms(), ConnectRooms(), AssignRoomTypes()
 
 ### IRoom
-  - int RoomID, List<Enemy> Enemies, List<Item> Items, List<Trap> Traps, bool Visited
-  - Enter(Player player), TriggerEvent(), ClearRoom()
+  - int RoomID, List<IRoomContent> Contents, bool Visited
 
-### TreasureRoom : IRomm
+### TreasureRoom : IRoom
 
-//More Rooms
+### IRoomContent
+  - OnEnter(GameContext context), OnExit(GameContext context)
+
+### EnemyGroup : IRoomContent
+  - List<Enemy> Enemies
+  - OnEnter(GameContext context)
+
+### LootContainer : IRoomContent
+  - List<Item> Items
+  - OnEnter(GameContext context)
+
+### TrapComponent : IRoomContent
+  - ITrap Trap
+  - OnEnter(GameContext context)
+
+### RoomEvent : IRoomContent
+  - IGameEvent Event
+  - OnEnter(GameContext context)
+
+//More Room Contents
 
 ### ITrap
   - string Name, bool IsHidden
-  - Trigger(Player player), Detect(Player player)
+  - Trigger(GameContext context), Detect(GameContext context)
 
 ### SpikeTrap : ITrap
-  - string Name, bool IsHidden, int damage
-  - SpikeTrap(), void Trigger(Player player), void Detect(Player player)
+  - string Name, bool IsHidden, int Damage
+  - SpikeTrap(bool isHidden, int damage), void Trigger(GameContext context), void Detect(GameContext context)
+
+//More Traps
 
 ### MapSystem
-  - List<Room> VisitedRooms
-  - RevealRoom(Room room), ShowMap()
+  - List<IRoom> VisitedRooms
+  - RevealRoom(IRoom room), ShowMap()
 
 ---
 
@@ -132,18 +200,18 @@
 ### IEquipable
   - Equip(Player player), Unequip(Player player)
 
-### IModifier
-  - Apply(Item item)
+### IItemGenerationModifier
+  - ApplyTo(Item item)
 
-### FireModifier : IModifier
+### IItemEffect
+  - OnEquip(Player player), OnUnequip(Player player), OnUse(Player player)
 
-//More Modifiers
-
-### IPassiveEffect
-  - Apply(Player player)
+### ItemEffectContainer
+  - List<IItemEffect> Effects
+  - AddEffect(IItemEffect effect), ApplyEquip(Player player), ApplyUnequip(Player player), ApplyUse(Player player)
 
 ### Item
-  - string Name, string Description, int Value, enum Rarity (Common, Uncommon, Rare, Epic, Legendary)
+  - string Name, string Description, int Value, enum Rarity (Common, Uncommon, Rare, Epic, Legendary), ItemEffectContainer Effects
 
 ### Weapon : Item, IEquipable
   - int DamageBonus, float AttackSpeed
@@ -154,33 +222,30 @@
   - Equip(Player player), Unequip(Player player)
 
 ### Potion : Item, IUsable
-  - int HealAmount, StatusEffect BuffEffect
+  - int HealAmount, ItemEffectContainer Effects
   - Use(Player player)
 
-### Relic : Item, IPassiveEffect
-  - Apply(Player player)
-
-### ItemModifier : IModifier
-  - string Name, int ValueModifier
-  - Apply(Item item)
+### Relic : Item
+  - ItemEffectContainer Effects
 
 ### LootTable
   - List<Item> PossibleLoot
   - RollLoot()
 
 ### ItemGenerator
-  - GenerateItem(), ApplyModifiers(Item item)
+  - GenerateItem(), ApplyGenerationModifiers(Item item)
 
 ---
 
 ## Systems
 
-### IInventory
-  - AddItem(Item item), RemoveItem(Item item), List<Item> GetItems()
-
-### Inventory : IInventory
+### Inventory
   - List<Item> Items
-  - AddItem(Item item), RemoveItem(Item item), UseItem(Item item), ListItems()
+  - AddItem(Item item), RemoveItem(Item item), GetItems()
+
+### InventoryController
+  - Inventory Inventory
+  - UseItem(Item item, Player player), ListItems(), CanUse(Item item, Player player)
 
 ### EquipmentManager
   - Item Weapon, Item Armor, Item Acessory
@@ -191,22 +256,41 @@
   - Activate(Player player)
 
 ### Ability : IAbility
-  - string Name, int Cooldown
-  - Activate(Player player), ApllyEffect()
+  - string Name, int Cooldown, IRequirement UseRequirement
+  - Activate(Player player), ApplyEffect()
 
 ### SkillTree
   - List<SkillNode> Nodes
   - UnlockSkill(SkillNode node), GetAvailableSkills()
 
 ### SkillNode
-  - string Name, bool IsUnlocked
+  - string Name, bool IsUnlocked, IRequirement UnlockRequirement
 
-### IShop
-  - List<Item> GetInventory(), Buy(Player player, Item item), Sell(Player player, Item item)
+### Shop
+  - List<Item> Inventory, EconomyController Economy
 
-### EconomySystem : Ishop
+### EconomySystem
   - int PlayerGold
-  - BuyItem(Item item), SellItem(Item item), GenerateShopInventory(), GetInventory()
+  - AddGold(int amount), SpendGold(int amount), CalculateBuyPrice(Item item), CalculateSellPrice(Item item)
+
+### EconomyController
+  - EconomySystem Economy, bool CanBuy(Player player, Item item), bool CanSell(Player player, Item item), Buy(Player player, Item item, Shop shop), Sell(Player player, Item item, Shop shop), int GetFinalBuyPrice(Item item), GetFinalSellPrice(Item item)
+
+### IRequirement
+  - bool IsSatisfied(GameContext context), string FailureMessage
+
+### RequirementGroup
+  - List<IRequirement> Requirements, bool RequireAll, bool IsSatisfied(GameContext context)
+
+### LevelRequirement : IRequirement
+
+### GoldRequirement : IRequirement
+
+### SkillRequirement : IRequirement
+
+### FactionRequirement: IRequirement
+
+//More Requirements
 
 ### ISaveable
   - Serialize(), Deserialize(string data)
@@ -221,18 +305,24 @@
 ### IDataLoader
   - Load()
 
+---
+
+## Events
+
+### GameContext
+  - Player Player, Dungeon Dungeon, EventSystem EventSystem, DialogueSystem Dialogue, CombatSystem Combat
+
 ### IGameEvent
-  - Execute(Player player)
+  - Execute(GameContext context)
 
 ### TreasureEvent : IGameEvent
-  - Execute(Player player)
+  - Execute(GameContext context)
 
 ### DataManager : IDataLoader
   - LoadItems(), LoadEnemies(), LoadEvents(), Load()
 
-
 ### EventSystem
-  - TriggerEvent(Room room), ResolveEvent()
+  - RoomEntry(GameContext context, IRoom room), RunEvent(IGameEvent event), RunTrap(ITrap trap, GameContext context)
 
 ### DialogueSystem
   - StartDialogue(string text), PresentChoices(List<string> choices), ResolveChoice(int choice)
@@ -257,29 +347,48 @@
 
 ## UI (Console Version)
 
+### IInput
+  - ReadLine(), ReadInt()
+
+### ConsoleInput : IInput
+  - ReadLine(), ReadInt()
+
+### UIController
+  - IRenderer Renderer, IMenuUI MenuUI, IInventoryUI InventoryUI, ICombatUI CombatUI, IDialogueUI DialogueUI
+  - ShowMainMenu(), ShowInventory(Inventory inventory), ShowCombatState(Player player, Enemy enemy), ShowDialogue(String text, List<string> choices)
+
 ### IRenderer
   - Print(string text), Clear()
 
 ### ConsoleRenderer : IRenderer
-  - ClearScreen(), PrintLine(string text), PrintHeader(string title), PrintSeparator()
+  - Clear(), Print(string text)
+
+### UIMenuModel
+  - string Title, List<string> Options
 
 ### IMenuUI
-  - ShowMenu(string title, List<string> options)
+  - ShowMenu(UIMenuModel model), GetSelection()
 
-### MenuSystem : IMenuUI
-  - ShowMainMenu(), ShowPauseMenu(), GetPlayerChoice(), ShowMenu(string title, List<string> options)
+### UIInventoryModel
+  - string Title, List<UIItemEntry> Items
+
+### UIItemEntry
+  - string Name, string Description, string Rarity, int Value
+
+### UIItemDetailsModel
+  - string Name, string Description, string Rarity, int Value, List<string> Effects
 
 ### IInventoryUI
-  - ShowInventory(List<Item> items)
+  - ShowInventory(UIInventoryModel model), SelectItem(), ShowItemDetails(UIItemDetailsModel model)
 
-### InventoryUI : IInventoryUI
-  - DisplayInventory(Inventory inventory), SelectItem(), ShowItemDetails(Item item), ShowInventory(List<Item> items)
+### UICombatStateModel
+  - String PlayerName, int PlayerHP, int PlayerMaxHP, string EnemyName, int EnemyHP, int EnemyMaxHP, List<string> LogLines
 
 ### ICombatUI
-  - ShowState(Player player, Enemy enemy), ShowLog(string message)
+  - ShowCombatState(UICombatStateModel model), ShowCombatOptions(), ShowLog(string message)
 
-### CombatUI : ICombatUI
-  - DisplayCombateState(Player player, Enemy enemy), ShowCombatOptions(), ShowCombatLog(string message), ShowState(Player player, Enemy enemy) ShowLog(string message)
+### UIDialogueModel
+  - string Text, List<string> Choices
 
-### DialogueUI
-  - ShowDialogue(string text), ShowChoices(List<string> choices), GetPlayerChoice()
+### IDialogueUI
+  - ShowDialogue(UIDialogueModel model), GetPlayerChoice()
