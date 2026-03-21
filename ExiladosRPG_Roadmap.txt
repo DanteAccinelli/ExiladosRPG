@@ -2,312 +2,207 @@
 
 ---
 
-## Phase 1 - Core Systems
+## Phase 1 - Core Engine
 
-### Project Setup
-  Create repository  
-  Configure Git  
-  Define folder structure  
-  Organize namespaces (Core, Characters, Combat, Dungeon, Items, Systems, UI)
+1.1 Game Loop & State
+  - GameManager
+  - StateManager
+  - GameState Enum
 
-### Game Loop
-  Create GameManager  
-  Implement main game loop  
-  Handle player input  
-  Handle game state transitions  
-  Implement start and exit conditions  
+1.2 Commands & Input
+  - ICommand
+  - CommandParser
+  - CommandHelpSystem
+  - IInput & ConsoleInput 
+  - //More Input types
+  - InputHandler
 
-### Game State Management
-  Create GameState enum  
-  Implement StateManager  
-  Define states (MainMenu, Playing, Combat, Inventory, Dialogue, GameOver)  
-  Implement state transitions  
+1.3 Logging
+  - ILogger
+  - Logger
 
-### Input System
-  Create InputHandler class  
-  Map player commands  
-  Validate player input  
-  Handle invalid commands  
+## Phase 2 - Characters Core
 
-### Command Help System
-  Implement help command  
-  List available commands  
-  Provide command descriptions  
+2.1 Stats & Effects Base
+  - Stats
+  - StatusEffectContainer
+  - IStatusEffect (simple placeholder implementation)
+  - PoisonEffect  
+  - //More Effect types
 
-### Character Classes
-  Create base Character class  
-  Implement Player class  
-  Implement Enemy class  
-  Define base attributes (HP, Attack, Defense, Level)  
-  Implement core methods (Attack, TakeDamage, Heal, IsAlive)
+2.2 Character Hierarchy
+  - IDamageable
+  - IAttacker
+  - IHealeable
+  - Character
+  - Player
+  - Enemy
+  - MeleeEnemy 
+  - //More Enemy types
 
-### Basic Combat
-  Create CombatSystem  
-  Implement turn-based combat  
-  Implement damage calculation  
-  Implement player attack  
-  Implement enemy attack  
-  Implement victory and defeat conditions  
+2.3 AI Behaviors
+  - IAIBehavior
+  - AgressiveBehavior  
+  - //More Behavior types
 
-### Status Effects
-  Create StatusEffect class  
-  Implement poison effect  
-  Implement burn effect  
-  Implement stun effect  
-  Implement buff and debuff durations  
+## Phase 3 - Combat System
 
-### Enemy AI
-  Implement enemy behavior logic  
-  Create aggressive enemies  
-  Create defensive enemies  
-  Create ranged enemies  
+3.1 Core Combat System
+  - CombatSystem
+  - TurnOrderManager
 
-### Simple Dungeon Navigation
-  Create Dungeon class  
-  Create Room class  
-  Implement player movement between rooms  
-  Implement room descriptions  
-  Implement navigation commands (north, south, east, west)
+3.2 Combat Actions
+  - ICombatAction
+  - AttackAction
+  - AbilityAction
+  - UseItemAction 
+  - //More Action types
 
-### Trap System
-  Create Trap class  
-  Implement spike traps  
-  Implement poison traps  
-  Implement hidden traps  
-  Implement trap detection  
+3.3 Damage & Effects
+  - DamageFormula
+  - StatusEffectProcessor
 
-### Enemy Encounters
-  Spawn enemies inside rooms  
-  Trigger combat when entering enemy rooms  
-  Handle enemy defeat  
-  Implement basic loot drops  
+## Phase 4 - Items & Inventory
 
-### Debug System
-  Create Logger system  
-  Print system messages  
-  Log combat calculations  
-  Log dungeon generation  
+4.1 Item Core
+  - IUsable
+  - IEquipable 
+  - Item
+  - Weapon
+  - Armor
+  - Potion
+  - Relic
 
-### Error Handling
-  Prevent invalid game states  
-  Validate player input  
-  Handle corrupted save files  
+4.2 Item Effects
+  - ItemEffectContainer
+  - IItemEffect
 
----
+4.3 Inventory & Equipment
+  - Inventory
+  - InventoryController
+  - EquipmentManager
 
-## Phase 2 - RPG Systems
+4.4 Loot & Item Generation
+  - LootTable
+  - ItemGenerator
+  - IItemGenerationModifier
 
-### Inventory
-  Create Inventory class  
-  Implement add item  
-  Implement remove item  
-  Implement view inventory  
-  Implement item usage  
+## Phase 5 - Dungeons & Rooms
 
-### Items and Equipment
-  Create Item base class  
-  Create Weapon class  
-  Create Armor class  
-  Create Potion class  
-  Create Relic class  
-  Implement item attributes (name, description, value)
+5.1 Dungeon Structure
+  - Dungeon
+  - RoomGraph
+  - RoomNode
+  - RoomNavigation
+  - DungeonGenerator
 
-### Equipment System
-  Create EquipmentManager  
-  Implement equipment slots (weapon, armor, accessory)  
-  Implement equip and unequip actions  
-  Apply equipment stat bonuses  
+5.2 Room Contents
+  - IRoomContent
+  - EnemyGroup
+  - LootContainer
+  - TrapComponent
+  - RoomEvent 
+  - //More Room Content types
 
-### Leveling System
-  Implement experience points  
-  Implement level progression  
-  Implement stat growth  
-  Implement LevelUp method  
-  Implement GainExperience method  
+5.3 Rooms & Traps
+  - IRoom
+  - TreasureRoom 
+  - //More Room types
+  - ITrap
+  - SpikeTrap 
+  - //More Trap types
 
-### Skill Tree
-  Create skill nodes  
-  Implement skill unlocking  
-  Implement branching skill paths  
+5.4 Map
+  - MapSystem
 
-### Abilities
-  Create Ability class  
-  Implement ability unlocking  
-  Store abilities on player  
-  Implement ability activation  
-  Implement ability effects  
+## Phase 6 - Abilities, Skills, Requirements
 
-### Loot System
-  Create LootTable system  
-  Implement drop chances  
-  Generate random items  
-  Implement rarity tiers (Common, Uncommon, Rare, Epic, Legendary)
+6.1 Abilities
+  - IAbility
+  - Ability 
+  - //More Ability types
 
-### Procedural Item Generation
-  Generate item prefixes  
-  Generate item suffixes  
-  Apply stat modifiers  
-  Combine modifiers with base items  
+6.2 Skill Tree
+  - SkillTree
+  - SkillNode
 
-### Economy System
-  Implement gold currency  
-  Implement item buying  
-  Implement item selling  
-  Generate shop inventory  
+6.3 Requirements
+  - IRequirement
+  - RequirementGroup
+  - LevelRequirement
+  - GoldRequirement
+  - SkillRequirement
+  - FactionRequirement
+  - //More Requirement Types
 
-### Save / Load System
-  Implement save game files  
-  Save player stats  
-  Save inventory data  
-  Save dungeon progress  
-  Implement load game  
-  Implement autosave system  
+## Phase 7 - Economy, Shops, Meta Systems
 
-### Save Slots
-  Implement multiple save slots  
-  Create player profiles  
-  Allow selecting save slot on game start  
-  Implement save slot deletion  
+7.1 Economy & Shop
+  - EconomySystem
+  - EconomyController
+  - Shop
 
-### Data Management
-  Store enemies in JSON files  
-  Store items in JSON files  
-  Load data at runtime  
-  Separate game data from code  
+7.2 Meta Systems
+  - GameContext
+  - FactionSystem
+  - AchievementSystem
+  - MetaProgressionSystem
+  - MetricsSystem
 
----
+## Phase 8 - Event FrameWork & Dialogue
 
-## Phase 3 - World Systems
+8.1 Event System
+  - IGameEvent
+  - TreasureEvent
+  - // MoreEvents
+  - EventSystem
 
-### Procedural Dungeon Generator
-  Create DungeonGenerator class  
-  Generate dungeon layout  
-  Connect rooms  
-  Generate dungeon floors  
-  Implement difficulty scaling by floor  
+8.2 Dialogue System
+  - DialogueSystem
 
-### Room Types
-  Create EnemyRoom  
-  Create TreasureRoom  
-  Create EventRoom  
-  Create ShopRoom  
-  Create BossRoom  
-  Implement room-specific behaviors  
+## Phase 9 - Save, Load, Profiles
 
-### Random Events
-  Create EventSystem  
-  Implement random event selection  
-  Implement event triggers  
-  Implement event outcomes  
-  Implement player decision options  
+9.1 Saving
+  - ISaveable
+  - SaveSystem
 
-### Map System
-  Track visited rooms  
-  Display dungeon map  
-  Reveal nearby rooms  
+9.2 Profiles
+  - ProfileManager
+  - IDataLoader
+  - DataManager
 
-### Boss System
-  Create Boss base class  
-  Implement boss abilities  
-  Implement boss phases  
-  Implement boss loot rewards  
+## Phase 10 - UI Integration
 
-### Run System
-  Implement start new run  
-  Reset dungeon on run start  
-  Generate new dungeon layout  
-  Track run progress  
+10.1 Core UI
+  - UIController
+  - IRenderer
+  - ConsoleRenderer
 
----
+10.2 Menu UI
+  - UIMenuModel
+  - IMenuUI
 
-## Phase 4 - Advanced Features
+10.3 Inventory UI
+  - UIInventoryModel
+  - UIItemEntry
+  - UIItemDetailsModel
+  - IInventoryUI
 
-### Relic System
-  Implement relic discovery  
-  Implement passive modifiers  
-  Implement relic stacking  
-  Implement relic effects during gameplay  
+10.4 Combat UI
+  - UICombatStateModel
+  - ICombatUI
 
-### Meta Progression
-  Track permanent upgrades  
-  Unlock abilities between runs  
-  Unlock new relics  
+10.5 Dialogue UI
+  - UIDialogueModel
+  - IDialogueUI
 
-### Faction Reputation
-  Define world factions  
-  Implement reputation values  
-  Implement reputation changes from decisions  
-  Implement faction-based events  
-
-### Branching Story Events
-  Implement dialogue system  
-  Track player decisions  
-  Implement branching outcomes  
-  Implement story flags and consequences  
-
-### Achievement System
-  Track player milestones  
-  Unlock achievements  
-  Record achievements in save file  
-
-### Game Metrics
-  Track player deaths  
-  Track run duration  
-  Track enemy kills  
-
-### Difficulty Scaling
-  Scale enemy stats by dungeon depth  
-  Implement elite enemies  
-  Implement boss mechanics  
-
----
-
-## Phase 5 - Game Systems Polish
-
-### Balancing
-  Adjust enemy stats  
-  Adjust XP progression curves  
-  Adjust item scaling and rarity balance  
-
-### Tutorial System
-  Introduce basic controls  
-  Introduce combat mechanics  
-  Introduce inventory usage  
-
-### Performance
-  Optimize dungeon generation  
-  Optimize combat calculations  
-  Reduce unnecessary memory usage  
-
-### Code Refactoring
-  Improve class architecture  
-  Remove duplicated code  
-  Improve maintainability  
-
-### Debugging
-  Expand debug logs  
-  Test edge cases  
-  Fix gameplay bugs  
-
----
-
-## Phase 6 - Unity Migration
-
-### Convert Console Systems to Unity
-  Port core systems (characters, combat, dungeon)  
-  Adapt systems to Unity architecture  
-  Separate game logic from UI  
-
-### Implement Graphics and Animation
-  Create player sprites  
-  Create enemy sprites  
-  Create dungeon tiles  
-  Implement character animations  
-
-### Replace Text UI with Gameplay Scenes
-  Implement player movement  
-  Implement camera system  
-  Implement scene management  
-  Implement graphical UI (health, inventory, abilities)
-
----
+## Phase 11 - Final Polish & Extra Content
+  - Add player classes
+  - Add more abilities
+  - Add more enemy types
+  - Add more traps
+  - Add more events
+  - Add more item and status effects
+  - Add factions, endings, lore
+  - Add new room types
+  - Add more weapon/armor categories

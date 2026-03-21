@@ -1,4 +1,4 @@
-Exilados RPG Class Architecture
+# Exilados RPG Class Architecture
 
 ---
 
@@ -65,7 +65,7 @@ Exilados RPG Class Architecture
 ### IAttacker
   - Attack(IDamageable target)
 
-### IHealeable
+### IHealable
   - Heal(int amount)
 
 2.2 Stats & Effects
@@ -85,7 +85,7 @@ Exilados RPG Class Architecture
   - string Name, int Duration, bool IsExpired, int DamagePerTurn
   - PoisonEffect(int damage, int duration)
 
-//More Effects
+//More Effect types
 
 2.3 Character Hierarchy
 
@@ -103,7 +103,7 @@ Exilados RPG Class Architecture
 
 ### MeleeEnemy : Enemy
 
-//More Enemies
+//More Enemy types
 
 2.4 AI Behaviors
 
@@ -113,7 +113,7 @@ Exilados RPG Class Architecture
 ### AgressiveBehavior : IAIBehavior
   - DecideAction(Enemy enemy, GameContext context)
 
-//More Behaviors
+//More Behavior types
 
 ---
 
@@ -147,7 +147,7 @@ Exilados RPG Class Architecture
   - Character User, IAbility Ability
   - Execute(GameContext context)
 
-//More Actions
+//More Action types
 
 3.3 Combat Calculations
 
@@ -188,7 +188,7 @@ Exilados RPG Class Architecture
 
 ### TreasureRoom : IRoom
 
-//More Rooms
+//More Room types
 
 4.3 Room Contents
 
@@ -211,7 +211,7 @@ Exilados RPG Class Architecture
   - IGameEvent Event
   - OnEnter(GameContext context)
 
-//More Room Contents
+//More Room Content types
 
 4.4 Traps
 
@@ -223,7 +223,7 @@ Exilados RPG Class Architecture
   - string Name, bool IsHidden, int Damage
   - SpikeTrap(bool isHidden, int damage), void Trigger(GameContext context), void Detect(GameContext context)
 
-//More Traps
+//More Trap types
 
 4.5 Map
 
@@ -244,8 +244,6 @@ Exilados RPG Class Architecture
 ### IEquipable
   - Equip(Player player), Unequip(Player player)
 
-### IItemGenerationModifier
-  - ApplyTo(Item item)
 
 ### IItemEffect
   - OnEquip(Player player), OnUnequip(Player player), OnUse(Player player)
@@ -285,6 +283,9 @@ Exilados RPG Class Architecture
 ### ItemGenerator
   - GenerateItem(), ApplyGenerationModifiers(Item item)
 
+### IItemGenerationModifier
+  - ApplyTo(Item item)
+
 ---
 
 6. Character Systems
@@ -316,7 +317,7 @@ Exilados RPG Class Architecture
   - string Name, int Cooldown, IRequirement UseRequirement
   - Activate(Player player), ApplyEffect()
 
-//More abilities
+//More Ability types
 
 6.4 Skills
 
@@ -369,7 +370,7 @@ Exilados RPG Class Architecture
 
 ### FactionRequirement: IRequirement
 
-//More Requirements
+//More Requirement types
 
 ---
 
@@ -410,6 +411,8 @@ Exilados RPG Class Architecture
 
 ### TreasureEvent : IGameEvent
   - Execute(GameContext context)
+
+//More Event types
 
 ### EventSystem
   - RoomEntry(GameContext context, IRoom room), RunEvent(IGameEvent event), RunTrap(ITrap trap, GameContext context)
